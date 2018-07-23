@@ -18,7 +18,8 @@ window.addEventListener(
             // add data
             map.addSource('trees', {
                 type: 'geojson',
-                data: 'json/mapbox.geojson'
+                data: 'json/tp2m/2017082200.geojson?f=' + Math.random(),
+                buffer: 0
             });
 
 
@@ -44,8 +45,11 @@ window.addEventListener(
                     // increase intensity as zoom level increases
                     'heatmap-intensity': {
                         stops: [
-                            [5, 0.4],
-                            [9, 0.6]
+                            [5, 0.45],
+                            [6, 0.45],
+                            [7, 0.8],
+                            [8, 0.8],
+                            [9, 0.8]
                         ]
                     },
                     // assign color values be applied to points depending on their density
@@ -55,32 +59,26 @@ window.addEventListener(
                         ['heatmap-density'],
                         0, 'rgb(255, 255, 255)',
                         0.01, 'rgb(51, 153, 255)',
-                        0.2, 'rgb(153, 204, 255)',
-                        0.4, 'rgb(255, 255, 204)',
-                        0.6, 'rgb(255, 153, 102)',
-                        0.8, 'rgb(255, 51, 0)'
+                        0.1, 'rgb(153, 204, 255)',
+                        0.5, 'rgb(255, 255, 204)',
+                        0.8, 'rgb(255, 153, 102)',
+                        1, 'rgb(255, 51, 0)'
                     ],
                     // increase radius as zoom increases
                     'heatmap-radius': {
                         stops: [
-                            [0, 1],
                             [5, 15],
                             [7, 50],
                             [8, 95],
-                            [9, 200],
-                            [10, 400],
-                            [11, 800],
-                            [12, 1400],
-                            [13, 10000]
+                            [9, 200]
                         ]
                     },
                     // decrease opacity to transition into the circle layer
                     'heatmap-opacity': {
                         // default: 1,
                         stops: [
-                            [0, 0.2],
-                            [5, 0.5],
-                            [7, 0.60]
+                            [5, 0.9],
+                            [9, 0.2]
                         ]
                     },
                 }
@@ -116,16 +114,16 @@ window.addEventListener(
                             [60, 'rgb(1,108,89)']
                         ]
                     },
-                     'circle-stroke-color': 'rgb(89, 89, 89)',
+                    'circle-stroke-color': 'rgb(89, 89, 89)',
                     'circle-stroke-width': 0.4,
                     'circle-opacity': {
                         stops: [
-                            [0, 0]
+                            [0, 0.01]
                         ]
                     },
                     'circle-stroke-opacity': {
                         stops: [
-                            [0, 0.1]
+                            [0, 0.2]
                         ]
                     }
                 }
