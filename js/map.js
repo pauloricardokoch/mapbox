@@ -18,7 +18,9 @@ window.addEventListener(
             // add data
             map.addSource('trees', {
                 type: 'geojson',
-                data: 'json/tp2m/2017082200.geojson?f=' + Math.random(),
+                data: 'json/' + getParameterByName('path')
+                + '/' + getParameterByName('file')
+                + '.geojson?f=' + Math.random(),
                 buffer: 0
             });
 
@@ -159,4 +161,14 @@ function setStyle(style) {
 // pitch (number) The pitch to set, measured in degrees away from the plane of the screen (0-60).
 function setPitch(pitch) {
     map.setPitch(pitch);
+}
+
+function getParameterByName(name, url) {
+    url = url | window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    var results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
