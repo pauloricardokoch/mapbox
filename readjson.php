@@ -15,4 +15,13 @@
   }
 
   header('Content-Type: application/json');
-  echo json_encode(dirStructure("json"), JSON_PRETTY_PRINT);
+
+  $array = [];
+  foreach (dirStructure("json") as $key => $value) {
+    foreach ($value as $data => $path) {
+      sort($path);
+      $array[$key][$data] = $path;
+    }
+  }
+
+  echo json_encode($array, JSON_PRETTY_PRINT);

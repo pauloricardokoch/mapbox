@@ -1,3 +1,35 @@
+var files = new Array();
+var data = new Array();
+$(function () {
+    $.get('readjson.php', function (data, status) {
+        for (i in data.json) {
+            $('#selectTipo').append($('<option>', { value: i, text: i }));
+
+            files[i] = new Array();
+            files[i].push('');
+            for (j in data.json[i]) {
+                files[i].push(data.json[i][j]);
+            }
+        };
+    });
+
+    $('#selectTipo').on('change', function () {
+        var selectFile = $('#selectFile');
+        selectFile.find('option').remove();
+        for (i in files[this.value]) {
+            var file = files[this.value][i];
+            selectFile.append($('<option>', { value: file, text: file }));
+        }
+    });
+
+    $('#selectFile').on('change', function () {
+        map.getSource('trees').setData(
+            './json/' + $('#selectTipo').val()
+            + '/' + $('#selectFile').val()
+            + '?f=' + Math.random());
+    });
+});
+
 mapboxgl.accessToken = 'pk.eyJ1IjoicGF1bG9yaWNhcmRva29jaCIsImEiOiJjampyaWdnZ3QwMDBhM2tvMGdvOGhlNmg4In0.RoTIYl025qE3exFMMxJX5g';
 
 var map;
@@ -18,9 +50,7 @@ window.addEventListener(
             // add data
             map.addSource('trees', {
                 type: 'geojson',
-                data: 'json/' + getParameterByName('path')
-                + '/' + getParameterByName('file')
-                + '.geojson?f=' + Math.random(),
+                data: null,
                 buffer: 0
             });
 
@@ -131,7 +161,7 @@ window.addEventListener(
                 }
             }, 'waterway-label');
 
-            map.on('click', 'trees-point', function(e) {
+            map.on('click', 'trees-point', function (e) {
                 new mapboxgl.Popup()
                     .setLngLat(e.features[0].geometry.coordinates)
                     .setHTML('<b>TP2M:</b> ' + e.features[0].properties.dbh)
@@ -163,8 +193,8 @@ function setPitch(pitch) {
     map.setPitch(pitch);
 }
 
-function getParameterByName(name, url) {
-    url = url | window.location.href;
+function getParameterByName(name) {
+    url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');
     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
     var results = regex.exec(url);

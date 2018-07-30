@@ -7,14 +7,46 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.js'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+    <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js' integrity='sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy' crossorigin='anonymous'></script>
     <script src='js/map.js'></script>
 
+    <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css' integrity='sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO'
+        crossorigin='anonymous'>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.css' rel='stylesheet' />
     <link href='css/index.css' rel='stylesheet' />
 </head>
 
 <body>
-    <div id='map'></div>
+    <div>
+        <nav class='navbar' style='height: 50px;'>
+            <div style="font-size: 25px;">Mapbox</div>
+            <div class='navbar-form justify-content-end'>
+                <form class='form-inline'>
+                    <div class='form-group'>
+                        <div class='form-group row'>
+                            <label for='selectTipo' class='col-form-label'>Tipo</label>
+                            <div>
+                                <select class='form-control' id='selectTipo'>
+                                    <option></option>
+                                </select>
+                            </div>
+                            <label for='selectFile' class='col-form-label'>Arquivo</label>
+                            <div>
+                                <select class='form-control' id='selectFile'>
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </nav>
+        <div style='display: block; position: absolute; width: 100%; height: calc(100% - 50px);'>
+            <div id='map' style='width: 100%; height: 100%;'></div>
+        </div>
+
+    </div>
 </body>
 
 </html>
