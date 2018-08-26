@@ -60,6 +60,9 @@ for (col in colnames(TP2M))
       print(paste(row, col, temperature[row, "new_pontos.LATITUDE"], temperature[row, "new_pontos.LATITUDE"]))
     }
   }
+  
+  if (col == "2017082323")
+    break
 }
 
 str = toJSON(list(type = "FeatureCollection", features = json), pretty = TRUE, auto_unbox = TRUE)
