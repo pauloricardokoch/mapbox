@@ -36,11 +36,12 @@ for (col in colnames(TP2M))
 {
   if (col != "LATITUDE" && col != "LONGITUDE")
   {
-    temperature <- plot_map(TP2M, col, "RS")
-    humidity <- plot_map(UR2M, col, "RS")
-    precipitation <- plot_map(PREC, col, "RS")
-    wind <- plot_map(V10M, col, "RS")
-    radiation <- plot_map(OCIS, col, "RS")
+    state = "BR"
+    temperature <- plot_map(TP2M, col, state)
+    humidity <- plot_map(UR2M, col, state)
+    precipitation <- plot_map(PREC, col, state)
+    wind <- plot_map(V10M, col, state)
+    radiation <- plot_map(OCIS, col, state)
     
     for (row in 1:nrow(temperature))
     {
