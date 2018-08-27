@@ -68,7 +68,7 @@ for (col in colnames(TP2M))
     }
   }
   
-  if (col == "2017082323")
+  if (col == "2017082223")
     break
 }
 
