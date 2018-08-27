@@ -44,6 +44,12 @@ for (col in colnames(TP2M))
     
     for (row in 1:nrow(temperature))
     {
+      y <- substr(col, start=1, stop=4)
+      m <- substr(col, start=5, stop=6)
+      d <- substr(col, start=7, stop=8)
+      h <- substr(col, start=9, stop=10)
+      date <- paste(paste(y, m, d, sep="-"), paste(h, "00", "00", sep=":"), sep=" ")
+      
       json[[length(json) + 1]] <- list(type = 'Feature', 
                                        properties = list(temperature = temperature[row, 3],
                                                          humidity = humidity[row, 3],
@@ -52,8 +58,8 @@ for (col in colnames(TP2M))
                                                          radiation = radiation[row, 3],
                                                          latitude = temperature[row, "new_pontos.LATITUDE"],
                                                          longitude = temperature[row, "new_pontos.LONGITUDE"],
-                                                         reading_time_start = col,
-                                                         reading_time_end = col),
+                                                         reading_time_start = date,
+                                                         reading_time_end = date),
                                        geometry = list(type = 'Point', 
                                                        coordinates = list(temperature[row, "new_pontos.LONGITUDE"], temperature[row, "new_pontos.LATITUDE"])))
       
