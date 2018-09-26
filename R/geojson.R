@@ -37,7 +37,7 @@ load("/var/www/html/mapbox/R/OCIS.Rda")
 json <- list()
 for (col in colnames(TP2M))
 {
-  if (col != "LATITUDE" && col != "LONGITUDE" && col > 2017082323)
+  if (col != "LATITUDE" && col != "LONGITUDE" && col > 2017082423)
   {
     state = "RS"
     temperature <- plot_map(TP2M, col, state)
@@ -59,11 +59,11 @@ for (col in colnames(TP2M))
       json[[length(json) + 1]] <- list(
         type = 'Feature',
         properties = list(
-          temperature = temperature[row, 3],
-          humidity = humidity[row, 3],
-          precipitation = precipitation[row, 3],
-          wind = wind[row, 3],
-          radiation = radiation[row, 3],
+          temperature = format(temperature[row, 3], digits=2, nsmall=2),
+          humidity = format(humidity[row, 3], digits=2, nsmall=2),
+          precipitation = format(precipitation[row, 3], digits=2, nsmall=2),
+          wind = format(wind[row, 3], digits=2, nsmall=2),
+          radiation = format(radiation[row, 3], digits=2, nsmall=2),
           latitude = temperature[row, "new_pontos.LATITUDE"],
           longitude = temperature[row, "new_pontos.LONGITUDE"],
           reading_time_start = date,
@@ -79,7 +79,7 @@ for (col in colnames(TP2M))
     }
   }
   
-  if (col == 2017082423)
+  if (col == 2017082523)
     break
 }
 
