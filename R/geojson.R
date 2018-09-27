@@ -98,10 +98,11 @@ readinput <- function(msg, default) {
   return (input)
 }
 
-input_shape_dir <- readinput("Informe o diretório onde se encontram os 'shape files', (default= [/var/www/html/mapbox/R]): ", "/var/www/html/mapbox/R");
-shape_br <- rgdal::readOGR(input_shape_dir, "estados", GDAL1_integer64_policy = TRUE)
+current_dir     <- getwd()
+input_shape_dir <- readinput(paste("Informe o diretório onde se encontram os 'shape files', (default= [", current_dir, "]: ", sep = ""), current_dir);
+shape_br        <- rgdal::readOGR(input_shape_dir, "estados", GDAL1_integer64_policy = TRUE)
 
-input_dir <- readinput("Informe o diretório onde se encontram os arquivos .Rda, (default= [/var/www/html/mapbox/R]): ", "/var/www/html/mapbox/R");
+input_dir <- readinput(paste("Informe o diretório onde se encontram os arquivos .Rda, (default= [", current_dir, "]: ", sep = ""), current_dir);
 for (file in list.files(path = input_dir, pattern = "*.Rda")) {
   cat(paste("Carregando o arquivo: /var/www/html/mapbox/R/", file, "\n", sep = ""))
   load(paste("/var/www/html/mapbox/R", file, sep = "/"))
@@ -313,4 +314,6 @@ str = toJSON(
   auto_unbox = TRUE
 )
 
-write(str, paste(input_dir_output, "/", state, dt_ini, dt_end, ".json", sep = ""))
+filename <- paste(input_dir_output, "/", state, dt_ini, "-", dt_end, ".json", sep = "")
+write(str, filename)
+cat(paste("Arquivo ", filename, " salvo ", "\n", sep = ""))
