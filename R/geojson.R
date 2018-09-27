@@ -76,11 +76,13 @@ feature <- function(state) {
         
         features[[length(features) + 1]] <-feature
         
-        print(paste(row, col, temperature[row, "new_pontos.LATITUDE"], temperature[row, "new_pontos.LATITUDE"]))
+        #print(paste(state, col))
       }
+      
+      #print(paste(state, col, sep = " - "))
     }
     
-    if (col == 2017082500)
+    if (col == 2017082523)
       break
   }
   
@@ -98,7 +100,35 @@ load("/var/www/html/mapbox/R/OCIS.Rda")
 
 datasets <- list()
 ids      <- list();
-for (state in c("RS", "SC", "PR", "SP", "RJ", "MG", "ES", "BA"))
+for (state in c("AC", 
+                "AL", 
+                "AM", 
+                "AP", 
+                "BA", 
+                "CE", 
+                "DF", 
+                "ES", 
+                "GO", 
+                "MA", 
+                "MG", 
+                "MS", 
+                "MT", 
+                "PA",
+                "PB",
+                "PE",
+                "PI",
+                "PR",
+                "RJ",
+                "RN",
+                "RO",
+                "RR",
+                "RS",
+                "SC",
+                "SE",
+                "SP",
+                "TO"#, 
+                #"BR"
+                ))
 {
   ids[[length(ids) + 1]]           <- paste("id", state, sep = "")
   datasets[[length(datasets) + 1]] <- list(
@@ -165,6 +195,7 @@ for (state in c("RS", "SC", "PR", "SP", "RJ", "MG", "ES", "BA"))
 }
 
 layers <- list()
+filters <- list()
 for (id in ids) {
   layers[[length(layers) + 1]] <- list(
     id     = paste("layer", id, sep = ""),
@@ -219,6 +250,20 @@ for (id in ids) {
       sizeScale = "linear"
     )
   )
+  
+  filters[[length(filters) + 1]] <- list(
+    dataId   = id,
+    id       = paste("filter", id, sep = ""),
+    name     = "reading_time_start",
+    type     = "timeRange",
+    value    = list(),
+    enlarged = FALSE,
+    plotType = "lineChart",
+    yAxis    =  list(
+      name = "humidity",
+      type = "real"
+    )
+  )
 }
 
 str = toJSON(
@@ -227,7 +272,7 @@ str = toJSON(
          version    = "v1",
          config     = list(
           visState            = list(
-            filters           = list(),
+            filters           = filters,
             layers            = layers,
             interactionConfig = list(
               tooltip = list(
