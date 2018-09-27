@@ -20,12 +20,14 @@ filter <- function(weatherData, iTime, estado) {
   return(data.frame(new_pontos$LONGITUDE, new_pontos$LATITUDE, new_pontos[, iTime]))
 }
 
-feature <- function(state) {
+feature <- function(state, dt_ini, dt_end) {
+  cat(paste("Extraindo as dados do estado ", state, " no período ", dt_ini, " - ", dt_end, "\n", sep = ""))
+  
   features <- list()
   index    <- 0
   for (col in colnames(TP2M))
   {
-    if (col != "LATITUDE" && col != "LONGITUDE" && col > 2017082423)
+    if (col != "LATITUDE" && col != "LONGITUDE" && col >= dt_ini)
     {
       temperature   <- filter(TP2M, col, state)
       humidity      <- filter(UR2M, col, state)
@@ -75,60 +77,49 @@ feature <- function(state) {
         feature[[length(feature) + 1]] <- date
         
         features[[length(features) + 1]] <-feature
-        
-        #print(paste(state, col))
       }
-      
-      #print(paste(state, col, sep = " - "))
     }
     
-    if (col == 2017082523)
+    if (col == dt_end)
       break
   }
+  
+  cat("Dados extraídos\n")
   
   return (features)
 }
 
-arquivo  <- "/var/www/html/mapbox/R"
-shape_br <- rgdal::readOGR(arquivo, "estados", GDAL1_integer64_policy = TRUE)
+readinput <- function(msg, default) {
+  cat("\n\n")
+  input <- readline(msg)
+  if (input == "")
+    input <- default
+  
+  return (input)
+}
 
-load("/var/www/html/mapbox/R/TP2M.Rda")
-load("/var/www/html/mapbox/R/UR2M.Rda")
-load("/var/www/html/mapbox/R/PREC.Rda")
-load("/var/www/html/mapbox/R/V10M.Rda")
-load("/var/www/html/mapbox/R/OCIS.Rda")
+input_shape_dir <- readinput("Informe o diretório onde se encontram os 'shape files', (default= [/var/www/html/mapbox/R]): ", "/var/www/html/mapbox/R");
+shape_br <- rgdal::readOGR(input_shape_dir, "estados", GDAL1_integer64_policy = TRUE)
+
+input_dir <- readinput("Informe o diretório onde se encontram os arquivos .Rda, (default= [/var/www/html/mapbox/R]): ", "/var/www/html/mapbox/R");
+for (file in list.files(path = input_dir, pattern = "*.Rda")) {
+  cat(paste("Carregando o arquivo: /var/www/html/mapbox/R/", file, "\n", sep = ""))
+  load(paste("/var/www/html/mapbox/R", file, sep = "/"))
+}
+
+input_dir_output <- readinput("Informe o diretório para salvar o arquivo geojson, (default= [/home/pkoch/Downloads]", "/home/pkoch/Downloads");
+
+cols   <- colnames(TP2M)
+dt_ini <- cols[3]
+dt_end <- cols[length(cols)]
+
+input_dt_ini <- readinput(paste("Informe o início do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_ini, "]): "), dt_ini);
+input_dt_end <- readinput(paste("Informe o término do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_end, "]): "), dt_end);
+input_state  <- readinput("Informe um estado para extrair os dados, (default= [RS]): ", "RS");
 
 datasets <- list()
 ids      <- list();
-for (state in c("AC", 
-                "AL", 
-                "AM", 
-                "AP", 
-                "BA", 
-                "CE", 
-                "DF", 
-                "ES", 
-                "GO", 
-                "MA", 
-                "MG", 
-                "MS", 
-                "MT", 
-                "PA",
-                "PB",
-                "PE",
-                "PI",
-                "PR",
-                "RJ",
-                "RN",
-                "RO",
-                "RR",
-                "RS",
-                "SC",
-                "SE",
-                "SP",
-                "TO"#, 
-                #"BR"
-                ))
+for (state in c(input_state))
 {
   ids[[length(ids) + 1]]           <- paste("id", state, sep = "")
   datasets[[length(datasets) + 1]] <- list(
@@ -137,7 +128,7 @@ for (state in c("AC",
       id      = paste("id", state, sep = ""),
       label   = paste(state, ".geojson", sep = ""),
       color   = list(143, 47, 191),
-      allData = feature(state),
+      allData = feature(state, input_dt_ini, input_dt_end),
       fields  = list(
         list(
           name   = "_geojson",
@@ -322,4 +313,4 @@ str = toJSON(
   auto_unbox = TRUE
 )
 
-write(str, paste("/var/www/html/mapbox/json/kepler.json", sep = ""))
+write(str, paste(input_dir_output, "/", state, dt_ini, dt_end, ".json", sep = ""))
