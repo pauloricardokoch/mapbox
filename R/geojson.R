@@ -314,6 +314,6 @@ str = toJSON(
   auto_unbox = TRUE
 )
 
-filename <- paste(input_dir_output, "/", state, dt_ini, "-", dt_end, ".json", sep = "")
+filename <- paste(input_dir_output, "/", state, "_", input_dt_ini, "_", input_dt_end, ".json", sep = "")
 write(str, filename)
 cat(paste("Arquivo ", filename, " salvo ", "\n", sep = ""))
