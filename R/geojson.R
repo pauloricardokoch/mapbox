@@ -105,7 +105,7 @@ shape_br        <- rgdal::readOGR(input_shape_dir, "estados", GDAL1_integer64_po
 input_dir <- readinput(paste("Informe o diretório onde se encontram os arquivos .Rda, (default= [", current_dir, "]: ", sep = ""), current_dir);
 for (file in list.files(path = input_dir, pattern = "*.Rda")) {
   cat(paste("Carregando o arquivo: /var/www/html/mapbox/R/", file, "\n", sep = ""))
-  load(paste("/var/www/html/mapbox/R", file, sep = "/"))
+  load(paste(input_dir, file, sep = "/"))
 }
 
 input_dir_output <- readinput("Informe o diretório para salvar o arquivo geojson, (default= [/home/pkoch/Downloads]", "/home/pkoch/Downloads");
@@ -114,13 +114,14 @@ cols   <- colnames(TP2M)
 dt_ini <- cols[3]
 dt_end <- cols[length(cols)]
 
-input_dt_ini <- readinput(paste("Informe o início do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_ini, "]): "), dt_ini);
-input_dt_end <- readinput(paste("Informe o término do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_end, "]): "), dt_end);
-input_state  <- readinput("Informe um estado para extrair os dados, (default= [RS]): ", "RS");
+input_dt_ini   <- readinput(paste("Informe o início do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_ini, "]): "), dt_ini);
+input_dt_end   <- readinput(paste("Informe o término do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_end, "]): "), dt_end);
+input_state    <- readinput("Informe um estado para extrair os dados, (default= [RS]): ", "RS");
+splited_state  <- strsplit(input_state, "-")
 
 datasets <- list()
 ids      <- list();
-for (state in c(input_state))
+for (state in unlist(splited_state))
 {
   ids[[length(ids) + 1]]           <- paste("id", state, sep = "")
   datasets[[length(datasets) + 1]] <- list(
@@ -314,7 +315,7 @@ str = toJSON(
   auto_unbox = TRUE
 )
 
-filename <- paste(input_dir_output, "/", state, "_", input_dt_ini, "_", input_dt_end, ".json", sep = "")
+filename <- paste(input_dir_output, "/", input_state, "_", input_dt_ini, "_", input_dt_end, ".json", sep = "")
 cat("Salvando dados\n")
 write(str, filename)
 cat(paste("Arquivo ", filename, " salvo ", "\n", sep = ""))
