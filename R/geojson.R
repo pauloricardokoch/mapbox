@@ -188,11 +188,11 @@ split <- list()
 filters <- list()
 for (id in ids) {
   layers[[length(layers) + 1]] <- list(
-    id     = paste("layer", id, "temperature", sep = ""),
+    id     = paste("layer", id, "-tmp-rad", sep = ""),
     type   = "grid",
     config = list(
       dataId  = id,
-      label   = substr(id, start = 3, stop = 6),
+      label   = paste(substr(id, start = 3, stop = 10), "-tmp-rad", sep = ""),
       columns = list(
         lat = "latitude",
         lng = "longitude"
@@ -240,11 +240,11 @@ for (id in ids) {
   )
   
   layers[[length(layers) + 1]] <- list(
-    id     = paste("layer", id, "humidity", sep = ""),
+    id     = paste("layer", id, "-hum-prec", sep = ""),
     type   = "grid",
     config = list(
       dataId  = id,
-      label   = substr(id, start = 3, stop = 6),
+      label   = paste(substr(id, start = 3, stop = 10), "-hum-prec", sep = ""),
       columns = list(
         lat = "latitude",
         lng = "longitude"
