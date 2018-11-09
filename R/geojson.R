@@ -2,10 +2,12 @@ library("jsonlite", lib.loc = "~/R/x86_64-redhat-linux-gnu-library/3.5")
 
 filter <- function(weatherData, iTime, estado) {
   tabela <- weatherData
-  if ((length(estado) == 1) & (estado == "BR"))
+  if ((length(estado) == 1) & (estado == "ALL"))
     shape_estado <- shape_br
-  else
+  else if (is.null(shape_br@data[["MUNICIPIO"]]))
     shape_estado <- shape_br[shape_br$sigla %in% estado,]
+  else
+    shape_estado <- shape_br[shape_br$MUNICIPIO %in% estado,]
   
   pontos                  <- data.frame(tabela$LONGITUDE, tabela$LATITUDE, tabela[, iTime])
   colnames(pontos)        <- c("LONGITUDE", "LATITUDE", iTime)
@@ -32,7 +34,6 @@ feature <- function(state, dt_ini, dt_end) {
       temperature   <- filter(TP2M, col, state)
       humidity      <- filter(UR2M, col, state)
       precipitation <- filter(PREC, col, state)
-      wind          <- filter(V10M, col, state)
       radiation     <- filter(OCIS, col, state)
       
       for (row in 1:nrow(temperature))
@@ -47,10 +48,9 @@ feature <- function(state, dt_ini, dt_end) {
         feature[[length(feature) + 1]] <- list(
           type = 'Feature',
           properties = list(
-            temperature        = format(temperature[row, 3], digits = 2, nsmall = 2),
+            temperature        = temperature[row, 3],
             humidity           = format(humidity[row, 3], digits = 2, nsmall = 2),
             precipitation      = format(precipitation[row, 3], digits = 2, nsmall = 2),
-            wind               = format(wind[row, 3], digits = 2, nsmall = 2),
             radiation          = format(radiation[row, 3], digits = 2, nsmall = 2),
             latitude           = temperature[row, "new_pontos.LATITUDE"],
             longitude          = temperature[row, "new_pontos.LONGITUDE"],
@@ -66,10 +66,9 @@ feature <- function(state, dt_ini, dt_end) {
         
         index <- index + 1
         
-        feature[[length(feature) + 1]] <- format(temperature[row, 3], digits = 2, nsmall = 2)
+        feature[[length(feature) + 1]] <- temperature[row, 3]
         feature[[length(feature) + 1]] <- format(humidity[row, 3], digits = 2, nsmall = 2)
         feature[[length(feature) + 1]] <- format(precipitation[row, 3], digits = 2, nsmall = 2)
-        feature[[length(feature) + 1]] <- format(wind[row, 3], digits = 2, nsmall = 2)
         feature[[length(feature) + 1]] <- format(radiation[row, 3], digits = 2, nsmall = 2)
         feature[[length(feature) + 1]] <- temperature[row, "new_pontos.LATITUDE"]
         feature[[length(feature) + 1]] <- temperature[row, "new_pontos.LONGITUDE"]
@@ -98,25 +97,27 @@ readinput <- function(msg, default) {
   return (input)
 }
 
-current_dir     <- getwd()
-input_shape_dir <- readinput(paste("Informe o diretório onde se encontram os 'shape files', (default= [", current_dir, "]: ", sep = ""), current_dir);
-shape_br        <- rgdal::readOGR(input_shape_dir, "estados", GDAL1_integer64_policy = TRUE)
+input_current_dir     <- getwd()
+input_shape_dir       <- readinput(paste("Informe o diretório onde se encontram os 'shape files', (default=[", input_current_dir, "]): ", sep = ""), input_current_dir);
+input_shape_file_name <- readinput(paste("Informe o nome dos arquivos 'shape files', (default=[estados]): ", sep = ""), "estados");
+shape_br              <- rgdal::readOGR(input_shape_dir, input_shape_file_name, GDAL1_integer64_policy = TRUE)
 
-input_dir <- readinput(paste("Informe o diretório onde se encontram os arquivos .Rda, (default= [", current_dir, "]: ", sep = ""), current_dir);
+input_dir <- readinput(paste("Informe o diretório onde se encontram os arquivos .Rda, (default=[", input_current_dir, "]): ", sep = ""), input_current_dir);
 for (file in list.files(path = input_dir, pattern = "*.Rda")) {
   cat(paste("Carregando o arquivo: /var/www/html/mapbox/R/", file, "\n", sep = ""))
   load(paste(input_dir, file, sep = "/"))
 }
 
-input_dir_output <- readinput("Informe o diretório para salvar o arquivo geojson, (default= [/home/pkoch/Downloads]", "/home/pkoch/Downloads");
+home <- path.expand("~")  
+input_dir_output <- readinput(paste("Informe o diretório para salvar o arquivo geojson, (default=[", home, "]):"), home);
 
 cols   <- colnames(TP2M)
 dt_ini <- cols[3]
 dt_end <- cols[length(cols)]
 
-input_dt_ini   <- readinput(paste("Informe o início do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_ini, "]): "), dt_ini);
-input_dt_end   <- readinput(paste("Informe o término do período para extrair os dados no formato YYYYMMDDHH, (default=[", dt_end, "]): "), dt_end);
-input_state    <- readinput("Informe um estado para extrair os dados, (default= [RS]): ", "RS");
+input_dt_ini   <- readinput(paste("Informe o início do período no formato YYYYMMDDHH, (default=[", dt_ini, "]): "), dt_ini);
+input_dt_end   <- readinput(paste("Informe o término do período no formato YYYYMMDDHH, (default=[", dt_end, "]): "), dt_end);
+input_state    <- readinput("Informe um estado/município ou digite ALL para todos, a informação deve estar contida no arquivo 'shape files' (default= [RS]): ", "RS");
 splited_state  <- strsplit(input_state, "-")
 
 datasets <- list()
@@ -153,11 +154,6 @@ for (state in unlist(splited_state))
           format = ""
         ),
         list(
-          name   = "wind",
-          type   = "real",
-          format = ""
-        ),
-        list(
           name   = "radiation",
           type   = "real",
           format = ""
@@ -188,11 +184,12 @@ for (state in unlist(splited_state))
 }
 
 layers <- list()
+split <- list()
 filters <- list()
 for (id in ids) {
   layers[[length(layers) + 1]] <- list(
-    id     = paste("layer", id, sep = ""),
-    type   = "hexagon",
+    id     = paste("layer", id, "temperature", sep = ""),
+    type   = "grid",
     config = list(
       dataId  = id,
       label   = substr(id, start = 3, stop = 6),
@@ -203,7 +200,7 @@ for (id in ids) {
       isVisible = FALSE,
       visConfig = list(
         opacity       = .8,
-        worldUnitSize = 12,
+        worldUnitSize = 15,
         resolution    = 8,
         colorRange = list(
           name     = "ColorBrewer RdYlBu-6",
@@ -232,13 +229,63 @@ for (id in ids) {
     ),
     visualChannels = list(
       colorField = list(
-        name = "temperature",
-        type = "real"
+        name = "temperature"
       ),
       colorScale = "quantize",
       sizeField = list(
-        name = "radiation",
-        type = "real"
+        name = "radiation"
+      ),
+      sizeScale = "linear"
+    )
+  )
+  
+  layers[[length(layers) + 1]] <- list(
+    id     = paste("layer", id, "humidity", sep = ""),
+    type   = "grid",
+    config = list(
+      dataId  = id,
+      label   = substr(id, start = 3, stop = 6),
+      columns = list(
+        lat = "latitude",
+        lng = "longitude"
+      ) ,
+      isVisible = FALSE,
+      visConfig = list(
+        opacity       = .8,
+        worldUnitSize = 15,
+        resolution    = 8,
+        colorRange = list(
+          name     = "ColorBrewer RdYlBu-6",
+          type     = "diverging",
+          category = "ColorBrewer",
+          colors   = c(
+            "#e6fafa",
+            "#c1e5e6",
+            "#9dd0d4",
+            "#75bbc1",
+            "#4ba7af",
+            "#00939c"
+          ),
+          reversed = FALSE
+        ),
+        coverage            = 1,
+        sizeRange           = c(0, 500),
+        percentile          = c(0, 100),
+        elevationPercentile = c(0, 100),
+        elevationScale      = 30,
+        "hi-precision"      = FALSE,
+        colorAggregation    = "average",
+        sizeAggregation     = "average",
+        enable3d            = TRUE
+      )
+    ),
+    visualChannels = list(
+      colorField = list(
+        name = "humidity"
+      ),
+      colorScale = "quantize",
+      sizeField = list(
+        name = "precipitation"
       ),
       sizeScale = "linear"
     )
