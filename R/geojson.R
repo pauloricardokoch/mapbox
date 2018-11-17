@@ -9,9 +9,9 @@ filter <- function(weatherData, iTime, estado) {
   else
     shape_estado <- shape_br[shape_br$MUNICIPIO %in% estado,]
   
-  pontos                  <- data.frame(tabela$LONGITUDE, tabela$LATITUDE, tabela[, iTime])
-  colnames(pontos)        <- c("LONGITUDE", "LATITUDE", iTime)
-  sp::coordinates(pontos) <- c("LONGITUDE", "LATITUDE")
+  pontos                  <- data.frame(tabela$longitude, tabela$latitude, tabela[, iTime])
+  colnames(pontos)        <- c("longitude", "latitude", iTime)
+  sp::coordinates(pontos) <- c("longitude", "latitude")
   sp::proj4string(pontos) <- sp::proj4string(shape_estado)
   new_pontos              <- tabela[!is.na(sp::over(pontos, as(shape_estado, "SpatialPolygons"))),]
   
@@ -19,7 +19,7 @@ filter <- function(weatherData, iTime, estado) {
   r              <- raster::raster(tab_raster, layer = grep(iTime, colnames(new_pontos)))
   raster::crs(r) <- sp::CRS("+init=epsg:4326")
   
-  return(data.frame(new_pontos$LONGITUDE, new_pontos$LATITUDE, new_pontos[, iTime]))
+  return(data.frame(new_pontos$longitude, new_pontos$latitude, new_pontos[, iTime]))
 }
 
 feature <- function(state, dt_ini, dt_end) {
@@ -29,7 +29,7 @@ feature <- function(state, dt_ini, dt_end) {
   index    <- 0
   for (col in colnames(TP2M))
   {
-    if (col != "LATITUDE" && col != "LONGITUDE" && col >= dt_ini)
+    if (col != "latitude" && col != "longitude" && col >= dt_ini)
     {
       temperature   <- filter(TP2M, col, state)
       humidity      <- filter(UR2M, col, state)
@@ -52,15 +52,15 @@ feature <- function(state, dt_ini, dt_end) {
             humidity           = format(humidity[row, 3], digits = 2, nsmall = 2),
             precipitation      = format(precipitation[row, 3], digits = 2, nsmall = 2),
             radiation          = format(radiation[row, 3], digits = 2, nsmall = 2),
-            latitude           = temperature[row, "new_pontos.LATITUDE"],
-            longitude          = temperature[row, "new_pontos.LONGITUDE"],
+            latitude           = temperature[row, "new_pontos.latitude"],
+            longitude          = temperature[row, "new_pontos.longitude"],
             reading_time_start = date,
             reading_time_end   = date,
             index              = index
           ),
           geometry = list(
             type        = 'Point',
-            coordinates = list(temperature[row, "new_pontos.LONGITUDE"], temperature[row, "new_pontos.LATITUDE"])
+            coordinates = list(temperature[row, "new_pontos.longitude"], temperature[row, "new_pontos.latitude"])
           )
         )
         
@@ -70,8 +70,8 @@ feature <- function(state, dt_ini, dt_end) {
         feature[[length(feature) + 1]] <- format(humidity[row, 3], digits = 2, nsmall = 2)
         feature[[length(feature) + 1]] <- format(precipitation[row, 3], digits = 2, nsmall = 2)
         feature[[length(feature) + 1]] <- format(radiation[row, 3], digits = 2, nsmall = 2)
-        feature[[length(feature) + 1]] <- temperature[row, "new_pontos.LATITUDE"]
-        feature[[length(feature) + 1]] <- temperature[row, "new_pontos.LONGITUDE"]
+        feature[[length(feature) + 1]] <- temperature[row, "new_pontos.latitude"]
+        feature[[length(feature) + 1]] <- temperature[row, "new_pontos.longitude"]
         feature[[length(feature) + 1]] <- date
         feature[[length(feature) + 1]] <- date
         
@@ -192,7 +192,7 @@ for (id in ids) {
     type   = "grid",
     config = list(
       dataId  = id,
-      label   = paste(substr(id, start = 3, stop = 10), "-tmp-rad", sep = ""),
+      label   = paste(id, "-tmp-rad", sep = ""),
       columns = list(
         lat = "latitude",
         lng = "longitude"
@@ -244,7 +244,7 @@ for (id in ids) {
     type   = "grid",
     config = list(
       dataId  = id,
-      label   = paste(substr(id, start = 3, stop = 10), "-hum-prec", sep = ""),
+      label   = paste(id, "-hum-prec", sep = ""),
       columns = list(
         lat = "latitude",
         lng = "longitude"
