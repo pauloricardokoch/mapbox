@@ -1,6 +1,11 @@
 library("jsonlite", lib.loc = "~/R/x86_64-redhat-linux-gnu-library/3.5")
 
 filter <- function(weatherData, iTime, estado) {
+
+  #return all data to a given time
+  #new_pontos = weatherData
+  #return (data.frame(new_pontos$latitude, new_pontos$longitude, new_pontos[,iTime]))
+
   tabela <- weatherData
   if ((length(estado) == 1) & (estado == "ALL"))
     shape_estado <- shape_br
@@ -192,7 +197,7 @@ for (id in ids) {
     type   = "grid",
     config = list(
       dataId  = id,
-      label   = paste(id, "-tmp-rad", sep = ""),
+      label   = paste(substring(id, 3, 100), "-tmp-rad", sep = ""),
       columns = list(
         lat = "latitude",
         lng = "longitude"
@@ -244,7 +249,7 @@ for (id in ids) {
     type   = "grid",
     config = list(
       dataId  = id,
-      label   = paste(id, "-hum-prec", sep = ""),
+      label   = paste(substring(id, 3, 100), "-hum-prec", sep = ""),
       columns = list(
         lat = "latitude",
         lng = "longitude"
